@@ -38,6 +38,20 @@
                 android:textSize="15sp"
 
                 />
+            <Button
+                android:id="@+id/playBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="85dp"
+                android:layout_gravity="center"
+                android:background="@drawable/buttonshape"
+                android:drawablePadding="5dp"
+                android:paddingLeft="40dp"
+                android:paddingRight="40dp"
+                android:text="Start"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+
+                />
 
 
         </LinearLayout>
