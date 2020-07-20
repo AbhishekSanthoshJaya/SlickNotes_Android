@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.aby.note_quasars_android.interfaces.AddNoteViewInterface;
+import com.aby.note_quasars_android.interfaces.DeleteNoteInterface;
 import com.aby.note_quasars_android.interfaces.EditNoteViewInterface;
 import com.aby.note_quasars_android.interfaces.FolderListerInterface;
 import com.aby.note_quasars_android.interfaces.MainViewInterface;
@@ -114,6 +115,31 @@ public class LocalCacheManager {
         });
     }
 
+
+    public void deleteNote(final DeleteNoteInterface deleteNoteInterface, Note note) {
+        Completable.fromAction(new Action() {
+            @Override
+            public void run() throws Exception {
+
+                db.noteDao().delete(note);
+            }
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io()).subscribe(new CompletableObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
+
+            @Override
+            public void onComplete() {
+                deleteNoteInterface.onNoteDeleted();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.d("ERROR", "onError: " + e);
+            }
+        });
+    }
 
     // For folders
 

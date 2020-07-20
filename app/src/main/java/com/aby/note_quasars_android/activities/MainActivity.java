@@ -11,15 +11,18 @@ import android.widget.Toast;
 
 import com.aby.note_quasars_android.database.Folder;
 import com.aby.note_quasars_android.database.LocalCacheManager;
+import com.aby.note_quasars_android.interfaces.DeleteNoteInterface;
 import com.aby.note_quasars_android.interfaces.MainViewInterface;
 import com.aby.note_quasars_android.database.Note;
 import com.aby.note_quasars_android.adapters.NotesAdapter;
 import com.aby.note_quasars_android.R;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.transition.Fade;
@@ -33,7 +36,7 @@ import butterknife.OnClick;
 
 import static androidx.core.view.ViewCompat.*;
 
-public class MainActivity extends AppCompatActivity implements MainViewInterface {
+public class MainActivity extends AppCompatActivity implements MainViewInterface, DeleteNoteInterface {
 
     private String NOTE_OBJECT_NAME = "NoteOBJECT";
     @BindView(R.id.rvNotes)
@@ -52,6 +55,20 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
         initViews();
         loadNotes();
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT| ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                LocalCacheManager.getInstance(MainActivity.this).deleteNote(MainActivity.this,adapter.getNoteAt(viewHolder.getAdapterPosition()));
+                Toast.makeText(MainActivity.this,"Deleted", Toast.LENGTH_SHORT).show();
+            }
+        }).attachToRecyclerView(rvNotes);
+
 
     }
 
@@ -142,5 +159,11 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         });
 
         return true;
+    }
+
+
+    @Override
+    public void onNoteDeleted() {
+        loadNotes();
     }
 }
