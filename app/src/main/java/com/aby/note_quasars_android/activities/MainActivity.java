@@ -1,11 +1,17 @@
 package com.aby.note_quasars_android.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,6 +24,7 @@ import com.aby.note_quasars_android.adapters.NotesAdapter;
 import com.aby.note_quasars_android.R;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityOptionsCompat;
@@ -27,6 +34,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.transition.Fade;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     NotesAdapter adapter;
     List<Note> notesList;
+    String sortBy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +112,29 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
     @Override
     public void onNotesLoaded(List<Note> notes) {
+
+        if(sortBy!= null){
+            if(sortBy.equals("Title")){
+                Collections.sort(notes, new Comparator<Note>() {
+                    @Override
+                    public int compare(Note lhs, Note rhs) {
+                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                        return (lhs.getTitle().toLowerCase().compareTo(rhs.getTitle().toLowerCase()) > 0) ? -1 :  0;
+                    }
+                });
+            }
+
+            else{
+                Collections.sort(notes, new Comparator<Note>() {
+                    @Override
+                    public int compare(Note lhs, Note rhs) {
+                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                        return lhs.getCreatedOn().after(rhs.getCreatedOn()) ? -1 :  0;
+                    }
+                });
+            }
+        }
+
         notesList = notes;
 
         if(notesList.size() == 0){
@@ -166,4 +199,76 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     public void onNoteDeleted() {
         loadNotes();
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId();
+        if(id == R.id.action_sort){
+            // Creating alert Dialog with one Button
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(MainActivity.this);
+
+            //AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+
+            // Setting Dialog Title
+            alertDialog.setTitle("Sort By");
+
+            // Setting Dialog Message
+            alertDialog.setMessage("Select Sorting Method");
+            final EditText input = new EditText(MainActivity.this);
+
+
+            final RadioButton[] rb = new RadioButton[2];
+            RadioGroup rg = new RadioGroup(this); //create the RadioGroup
+            rg.setOrientation(RadioGroup.HORIZONTAL);//or RadioGroup.VERTICAL
+            rb[0]  = new RadioButton(this);
+            rb[0].setText("Title");
+            rg.addView(rb[0]);
+
+            rb[1]  = new RadioButton(this);
+            rb[1].setText("Date");
+            rg.addView(rb[1]);
+
+
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT);
+            rg.setLayoutParams(lp);
+            alertDialog.setView(rg);
+            //alertDialog.setView(input);
+
+
+
+            // Setting Positive "Yes" Button
+            alertDialog.setPositiveButton("Sort",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int which) {
+                            // Write your code here to execute after dialog
+                            if(rb[0].isChecked()){
+                                sortBy = "Title";
+                            }
+                            else{
+                                sortBy = "Date";
+                            }
+                            loadNotes();
+                        }
+                    });
+            // Setting Negative "NO" Button
+            alertDialog.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Write your code here to execute after dialog
+                            dialog.cancel();
+                        }
+                    });
+
+            // closed
+
+            // Showing Alert Message
+            alertDialog.show();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 }
