@@ -190,7 +190,6 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
                 .getFolders(this);
 
 
-
     }
 
 

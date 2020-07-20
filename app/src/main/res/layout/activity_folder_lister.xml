@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginRight="24dp"
         android:layout_marginBottom="24dp"
-        android:backgroundTint="#130A0A"
-        android:src="@android:drawable/ic_input_add"
+        android:src="@drawable/addfolder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
