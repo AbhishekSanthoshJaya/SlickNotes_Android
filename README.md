@@ -6,7 +6,7 @@ Abhishek Santhosh Jaya <br>
 Prakash Rana <br>
 Raghav Bobal <br>
 
-## PROJECT DESCRIPTIONA n
+## PROJECT DESCRIPTION
 An application for Android that allows the user to take and organize notes. <br>
 This application allows users to organize notes by the subject that they choose. <br>
 Every note taken stores a date and the time at which it was taken. <br>
