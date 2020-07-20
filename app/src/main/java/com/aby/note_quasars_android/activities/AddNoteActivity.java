@@ -1,8 +1,10 @@
 package com.aby.note_quasars_android.activities;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -17,8 +19,10 @@ import com.aby.note_quasars_android.interfaces.AddNoteViewInterface;
 import com.aby.note_quasars_android.R;
 import com.aby.note_quasars_android.interfaces.EditNoteViewInterface;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.os.Environment;
@@ -57,6 +61,8 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
     static final int REQUEST_TAKE_PHOTO = 1;
     String currentPhotoPath;
 
+    private int REQUEST_AUDIO_CODE = 3456;
+
 
     @BindView(R.id.containerLinearLayout)
     LinearLayout containerLinearLayout;
@@ -67,6 +73,21 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
     ArrayList<String> imageURIs;
     ArrayList<String> soundURIs;
 
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted ) finish();
+
+    }
 
 
     @Override
@@ -78,9 +99,16 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_baseline_close_24);
 
 
+        // ask permissions
+        getPermission();
         folder = (Folder) getIntent().getSerializableExtra(FolderListerActivity.FOLDER_OBJ_NAME);
 
         setUpViews();
+    }
+
+    private void getPermission(){
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+
     }
 
 
@@ -162,6 +190,11 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
         else if(id == R.id.take_photo){
 
             dispatchTakePictureIntent();
+        }
+        else{
+            Intent intent = new Intent(this, AudioActivity.class);
+            startActivityForResult(intent,REQUEST_AUDIO_CODE);
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -272,12 +305,19 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        Uri photoURI = FileProvider.getUriForFile(this,
-                "com.aby.note_quasars_android.fileprovider",
-                photoFile);
-//        addImageViewAt(getCurrentChildPosition() + 1, photoURI);
+        if(requestCode == REQUEST_AUDIO_CODE){
 
-        UIHelper.addImageViewAt(getCurrentChildPosition()+1,photoURI,containerLinearLayout,this);
+        }
+        else{
+            Uri photoURI = FileProvider.getUriForFile(this,
+                    "com.aby.note_quasars_android.fileprovider",
+                    photoFile);
+
+            UIHelper.addImageViewAt(getCurrentChildPosition()+1,photoURI,containerLinearLayout,this);
+
+
+        }
+
 
     }
 }
