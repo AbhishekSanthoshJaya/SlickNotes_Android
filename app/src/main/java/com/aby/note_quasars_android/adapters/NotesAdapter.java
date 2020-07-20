@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.core.view.ViewCompat;
@@ -15,16 +17,20 @@ import com.aby.note_quasars_android.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> implements Filterable {
 
     Context context;
     List<Note> noteList = new ArrayList<>();
+    private List<Note> noteListFull = new ArrayList<>();
+
     private OnItemClickListner listner;
 
 
     public NotesAdapter(Context context, List<Note> noteList) {
         this.context = context;
         this.noteList = noteList;
+        noteListFull = new ArrayList<>(noteList);
+
     }
 
     @Override
@@ -45,6 +51,43 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public int getItemCount() {
         return noteList.size();
     }
+
+    @Override
+    public Filter getFilter() {
+        return noteListFilter;
+    }
+
+    private Filter noteListFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+            List<Note> filterList = new ArrayList<>();
+            if(charSequence == null || charSequence.length() == 0){
+                filterList.addAll(noteListFull);
+            }
+            else{
+                String filterPattern = charSequence.toString().trim().toLowerCase();
+                for(Note note: noteListFull){
+                    if(note.getTitle().toLowerCase().contains(filterPattern) ||
+                            note.getNote().toLowerCase().contains(filterPattern) ){
+                        filterList.add(note);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filterList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+
+
+            noteList.clear();
+            noteList.addAll((List)filterResults.values);
+            notifyDataSetChanged();
+        }
+    };
+
 
     public class NotesViewHolder extends RecyclerView.ViewHolder{
 
