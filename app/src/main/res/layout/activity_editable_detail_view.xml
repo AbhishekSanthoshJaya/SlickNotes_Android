@@ -49,6 +49,20 @@
 
                 />
 
+            <TextView
+                android:id="@+id/tvNotelocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif-condensed-medium"
+                android:text="location"
+                android:textColor="#8BC34A"
+                android:textSize="20sp"
+                android:textStyle="bold"
+
+                />
+
               <Spinner
                 android:id="@+id/folders_spinner"
                 android:layout_width="match_parent"

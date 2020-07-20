@@ -6,11 +6,14 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +33,7 @@ import com.aby.note_quasars_android.database.LocalCacheManager;
 import com.aby.note_quasars_android.database.Note;
 import com.aby.note_quasars_android.interfaces.EditNoteViewInterface;
 import com.aby.note_quasars_android.interfaces.FolderListerInterface;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +65,9 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
     @BindView(R.id.tvNoteCreatedOnDetail)
     TextView tvNoteCreatedOnDetail;
 
+    @BindView(R.id.tvNotelocation)
+    TextView tvNotelocation;
+
     @BindView(R.id.folders_spinner)
     Spinner folderSpinner;
 
@@ -77,6 +84,51 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
         initialSetupViewsForDetail();
     }
 
+
+    private String getGeoCodelocation(LatLng latLng){
+        Geocoder geoCoder = new Geocoder(this);
+        Address address = null;
+
+        try{
+            List<Address> matches = geoCoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            address = (matches.isEmpty() ? null : matches.get(0));
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+        String title = "";
+        String snippet = "";
+
+        ArrayList<String> snippetComponents = new ArrayList<>();
+
+        if(address != null){
+
+
+
+            // get snippet
+
+            if(address.getLocality() != null)
+            {
+                snippetComponents.add(address.getLocality());
+
+            }
+            if(address.getAdminArea() != null)
+            {
+                snippetComponents.add(address.getAdminArea());
+
+            }
+
+        }
+
+
+
+        snippet = TextUtils.join(", ",snippetComponents);
+
+
+        return  snippet;
+    }
+
     private void initialSetupViewsForDetail(){
 
         Intent intent = getIntent();
@@ -89,7 +141,14 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
             tvNoteTitleDetail.setBackground(null);
 
             tvNoteCreatedOnDetail.setText(note.getCreatedOn().toString());
+            tvNotelocation.setText("No location");
 
+            if(note.getLatitude() != null && note.getLongitude() != null){
+                LatLng latLng = new LatLng(Double.parseDouble(note.getLatitude()),
+                        Double.parseDouble(note.getLongitude()) );
+                String locationString = getGeoCodelocation(latLng);
+                tvNotelocation.setText(locationString);
+            }
             this.folderSpinner.setEnabled(false);
 
 
@@ -102,7 +161,7 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
 
 
             int textPosition= 1, imagePosition= 0,  soundPosition= 0;
-            int currentChildPosition = 3;
+            int currentChildPosition = 4;
             for(String viewType: viewOrder.subList(1,viewOrder.size())){
                 if(viewType.equals("editText")){
                     EditText newEditText = UIHelper.getPreparedEditText(this);
