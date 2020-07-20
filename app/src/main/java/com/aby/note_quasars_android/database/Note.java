@@ -38,6 +38,8 @@ public class Note implements Serializable {
     private ArrayList<String> texts;
     private ArrayList<String> viewOrders;
     private ArrayList<String> sounds;
+    private String latitude;
+    private String longitude;
 
     public Note(){
 
@@ -90,6 +92,20 @@ public class Note implements Serializable {
         this.sounds = sounds;
 
 
+    }
+
+    public Note(String title,String note,int parentFolder,  ArrayList<String> photos, ArrayList<String> texts,
+                ArrayList<String> viewOrders,ArrayList<String> sounds, String latitude, String longitude){
+        this.title = title;
+        this.note = note;
+        this.createdOn = new Date();
+        this.parentFolder = parentFolder;
+        this.photos = photos;
+        this.texts = texts;
+        this.viewOrders = viewOrders;
+        this.sounds = sounds;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public int getId() {
@@ -163,5 +179,21 @@ public class Note implements Serializable {
 
     public void setSounds(ArrayList<String> sounds) {
         this.sounds = sounds;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 }

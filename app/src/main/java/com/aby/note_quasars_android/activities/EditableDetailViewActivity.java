@@ -107,6 +107,9 @@ public class EditableDetailViewActivity extends AppCompatActivity implements Edi
                 if(viewType.equals("editText")){
                     EditText newEditText = UIHelper.getPreparedEditText(this);
                     newEditText.setEnabled(false);
+                    if(textPosition>= texts.size()){
+                        continue;
+                    }
                     newEditText.setText(texts.get(textPosition));
                     containerLinearLayout.addView(newEditText);
                     textPosition ++;

@@ -1,7 +1,11 @@
 package com.aby.note_quasars_android.activities;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
@@ -27,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -52,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
     RecyclerView rvNotes;
     Folder folder;
 
+    LocationManager locationManager;
+    LocationListener locationListener;
+
     NotesAdapter adapter;
     List<Note> notesList;
     String sortBy;
@@ -61,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
 
 
         initViews();
@@ -87,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
         super.onResume();
         loadNotes();
     }
+
+
 
     private void initViews() {
 
@@ -118,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
                 Collections.sort(notes, new Comparator<Note>() {
                     @Override
                     public int compare(Note lhs, Note rhs) {
-                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
                         return (lhs.getTitle().toLowerCase().compareTo(rhs.getTitle().toLowerCase()) > 0) ? -1 :  0;
                     }
                 });
@@ -128,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
                 Collections.sort(notes, new Comparator<Note>() {
                     @Override
                     public int compare(Note lhs, Note rhs) {
-                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
                         return lhs.getCreatedOn().after(rhs.getCreatedOn()) ? -1 :  0;
                     }
                 });
@@ -270,5 +279,6 @@ public class MainActivity extends AppCompatActivity implements MainViewInterface
 
         return super.onOptionsItemSelected(item);
     }
+
 
 }

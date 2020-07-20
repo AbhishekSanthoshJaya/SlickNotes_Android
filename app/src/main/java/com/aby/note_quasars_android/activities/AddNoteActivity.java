@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +21,8 @@ import com.aby.note_quasars_android.database.Note;
 import com.aby.note_quasars_android.interfaces.AddNoteViewInterface;
 import com.aby.note_quasars_android.R;
 import com.aby.note_quasars_android.interfaces.EditNoteViewInterface;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -54,9 +59,16 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
 
     EditText etTitle;
 
+    private static final int REQUEST_CODE = 900;
 
     File photoFile;
     Folder folder;
+
+    LocationManager locationManager;
+    LocationListener locationListener;
+    private FusedLocationProviderClient fusedLocationClient;
+
+    Location currentLocation;
 
     static final int REQUEST_TAKE_PHOTO = 1;
     String currentPhotoPath;
@@ -75,16 +87,20 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private boolean permissionToRecordAccepted = false;
-    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+    private String[] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION};
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
+        switch (requestCode) {
             case REQUEST_RECORD_AUDIO_PERMISSION:
-                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                 break;
+
+
         }
+
+
         if (!permissionToRecordAccepted ) finish();
 
     }
@@ -101,14 +117,56 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
 
         // ask permissions
         getPermission();
+
+
         folder = (Folder) getIntent().getSerializableExtra(FolderListerActivity.FOLDER_OBJ_NAME);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                currentLocation = location;
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+
+
+
 
         setUpViews();
     }
 
     private void getPermission(){
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-
     }
 
 
@@ -136,6 +194,9 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
 
     }
 
+    private boolean hasLocationPermission() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
 
 
 
@@ -161,8 +222,14 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
             showToast("Please fill all the fields before saving");
         }else
         {
+
+            String latitude = Double.toString(currentLocation.getLatitude());
+            String logitude = Double.toString(currentLocation.getLongitude());
+
+
             //Call Method to add note
-            Note note = new Note(title,note_text, folder.getId(),imageURIs,texts,viewOrder,soundURIs);
+            Note note = new Note(title,note_text, folder.getId(),imageURIs,texts,viewOrder,soundURIs,
+                    latitude,logitude);
             LocalCacheManager.getInstance(this)
                     .addNotes(this, note);
         }
@@ -297,7 +364,6 @@ public class AddNoteActivity extends AppCompatActivity implements AddNoteViewInt
         }
         return containerLinearLayout.getChildCount()-1;
     }
-
 
 
 
